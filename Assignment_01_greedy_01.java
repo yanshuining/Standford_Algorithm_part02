@@ -48,7 +48,7 @@ public class greedy_01 {
 		return  data;
 	}
 	
-	public static int qs_partition(int[][] inarray, int left, int right){
+	public static int qs_partition_bydiff(int[][] inarray, int left, int right){
 		int pivot = inarray.length/2;
 		//swap pivot and rightmost element
 		int[] temp = inarray[pivot];
@@ -66,8 +66,7 @@ public class greedy_01 {
 			}
 			else if(inarray[i][0]-inarray[i][1] == (temp[0]-temp[1]))
 			{
-				if (inarray[i][0] >
-				temp[0]){
+				if (inarray[i][0] >	temp[0]){
 					int[] tmp = inarray[i];
 					inarray[i]=inarray[storeIndex];
 					inarray[storeIndex]=tmp;
@@ -83,26 +82,83 @@ public class greedy_01 {
 		return storeIndex;
 	}
 	
-	public static void quickSort(int[][] weight_length, int left, int right){
+	public static void quickSort_bydiff(int[][] weight_length, int left, int right){
 		if (left<right){
-			int p = qs_partition(weight_length, left, right);
-			quickSort(weight_length, left, p-1);
-			quickSort(weight_length, p+1, right);
+			int p = qs_partition_bydiff(weight_length, left, right);
+			quickSort_bydiff(weight_length, left, p-1);
+			quickSort_bydiff(weight_length, p+1, right);
 		}
 	}
 	
+
+	public static int qs_partition_byratio(int[][] inarray, int left, int right){
+		int pivot = inarray.length/2;
+		//swap pivot and rightmost element
+		int[] temp = inarray[pivot];
+		inarray[pivot]=inarray[right];
+		inarray[right]=temp;
+		
+		int storeIndex = left;
+		for (int i=left; i<=right-1; i++){
+			double ratio = (double)inarray[i][0]/(double)inarray[i][1];
+			double ratio_pivot = (double) temp[0]/(double)temp[1];
+			if (ratio > ratio_pivot)
+			{
+				int[] tmp = inarray[i];
+				inarray[i]=inarray[storeIndex];
+				inarray[storeIndex]=tmp;
+				storeIndex++;
+			}
+			else if(ratio == ratio_pivot)
+			{
+				if (inarray[i][0] >	temp[0]){
+					int[] tmp = inarray[i];
+					inarray[i]=inarray[storeIndex];
+					inarray[storeIndex]=tmp;
+					storeIndex++;
+				}
+			}
+		}
+		//swap inarray[storeIndex] and inarray[right]
+		temp = inarray[right];
+		inarray[right] = inarray[storeIndex];
+		inarray[storeIndex]=temp;
+		
+		return storeIndex;
+	}
 	
+	public static void quickSort_byratio(int[][] weight_length, int left, int right){
+		if (left<right){
+			int p = qs_partition_byratio(weight_length, left, right);
+			quickSort_byratio(weight_length, left, p-1);
+			quickSort_byratio(weight_length, p+1, right);
+		}
+	}
 	
 	public static void main (String[] args) throws IOException{
 		String filename = "C:/Users/Wenhua/Google Drive/Coursera-STD-algorithm2/assignment1/jobs.txt";
 		int[][] file = readLines(filename);
 		int length=file.length;
 
-		int completionTime = 0;
-		int weightSum=0;
+		long completionTime = 0;
+		long weightSum=0;
 		
 		System.out.println("************");
-		quickSort(file, 0, file.length-1);
+		quickSort_bydiff(file, 0, file.length-1);
+		completionTime = 0;
+		weightSum=0;		
+
+		for (int i=0; i<length; i++){
+			completionTime+=file[i][1];
+			weightSum = weightSum+file[i][0]*completionTime;			
+		}
+		System.out.println("weightSum="+weightSum);
+		
+
+		System.out.println("************");
+		quickSort_byratio(file, 0, file.length-1);
+		completionTime = 0;
+		weightSum=0;
 		/*int index=0;
 		for (int i=0; i<length; i++){
 			System.out.print(index+" ");
@@ -113,7 +169,7 @@ public class greedy_01 {
 			completionTime+=file[i][1];
 			weightSum = weightSum+file[i][0]*completionTime;
 			
-			System.out.print(file[i][0]-file[i][1]);
+			System.out.print((double)file[i][0]/(double)file[i][1]);
 			System.out.print(" "+completionTime);
 			System.out.print(" "+weightSum);
 			System.out.println();
